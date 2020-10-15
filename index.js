@@ -13,6 +13,10 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+app.get('/',(req,res)=>{
+
+    res.send("Server Works SuccessFully ")
+})
 
 client.connect(err => {
     const companiesCollection = client.db("creativeAgencyDB").collection("companies");
