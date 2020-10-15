@@ -1,0 +1,33 @@
+{
+  "name": "creative-agency-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.6.2",
+    "swiper": "^6.3.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.5"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "start:dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tamim-Hossain/creative-agency-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tamim-Hossain/creative-agency-server/issues"
+  },
+  "homepage": "https://github.com/Tamim-Hossain/creative-agency-server#readme"
+}
