@@ -12,91 +12,117 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 app.use(bodyParser.json());
 app.use(cors());
 
-
-
-
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 app.get('/',(req,res)=>{
 
-    res.send("Server Works SuccessFully ")
+    res.send("Server Works SuccessFully ") 
 })
 
 client.connect(err => {
-    const companiesCollection = client.db("creativeAgencyDB").collection("companies");
-    const feedbackCollection = client.db("creativeAgencyDB").collection("feedback");
-    const servicesCollection = client.db("creativeAgencyDB").collection("services");
-    const ordersCollection = client.db("creativeAgencyDB").collection("orders");
+    const creativityCollection = client.db("creativeAgencyDB").collection("creativity");
+    const reviewCollection = client.db("creativeAgencyDB").collection("review");
+    const productCollection = client.db("creativeAgencyDB").collection("product");
+    const adminCollection = client.db("creativeAgencyDB").collection("admin");
 
-
-    app.get('/companies', (req, res) => {
-        companiesCollection.find({})
+    // Showing products
+    app.get('/products', (req, res) => {
+        productCollection.find({})
             .toArray((err, documents) => {
-                res.send(documents);
+                res.send(documents)
             })
-    })
-
-
-    app.get('/feedback', (req, res) => {
-        feedbackCollection.find({})
-            .toArray((err, documents) => {
-                res.send(documents);
-            })
-    })
-
-    app.post('/feedback', (req, res) => {
-        const orders = req.body;
-        feedbackCollection.insertOne(orders)
-            .then(result => {
-                res.send(result.insertedCount > 0)
-            })
-    })
-
-
-    app.get('/services', (req, res) => {
-        servicesCollection.find({})
-            .toArray((err, documents) => {
-                res.send(documents);
-            })
-    })
-
-    app.post('/services', (req, res) => {
-        const services = req.body;
-        servicesCollection.insertOne(services)
-            .then(result => {
-                res.send(result.insertedCount > 0)
-            })
-    })
-
-
-    app.get('/target-orders', (req, res) => {
-        ordersCollection.find({ email: req.query.email })
-            .toArray((err, documents) => {
-                res.send(documents);
-            })
-    })
-
-    app.get('/orders', (req, res) => {
-        ordersCollection.find({})
-            .toArray((err, documents) => {
-                res.send(documents);
-            })
-    })
-
-    app.post('/orders', (req, res) => {
-        const orders = req.body;
-        ordersCollection.insertOne(orders)
-            .then(result => {
-                res.send(result.insertedCount > 0)
-            })
-    })
-
-
-    app.delete('/delete/:id', (req, res) => {
-        ordersCollection.deleteOne({ _id: ObjectId(req.params.id) })
-            .then((result) => {
-                res.send(result.deletedCount > 0);
-            });
     });
+
+    // add an admin
+    app.post('/addAnAdmin', (req, res) => {
+        const email = req.body.email;
+        adminCollection.insertOne({ email })
+            .then(res => {
+                res.send(res.insertedCount > 0);
+            })
+    })
+
+    // for admin login
+    app.get('/isAdmin', (req, res) => {
+        const email = req.query.email;
+        adminCollection.find({ email })
+            .toArray((err, collection) => {
+                res.send(collection)
+            })
+    })
+
+    // admin added product
+    app.post('/addProduct', (req, res) => {
+        const description = req.body.description;
+        const service = req.body.service;
+        const file = req.files.image;
+        const Img = file.data;
+        const encImg = Img.toString('base64');
+        const image = {
+            contentType: req.files.image.mimetype,
+            size: req.files.image.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+
+        productCollection.insertOne({ description, service, image })
+            .then(result => {
+                res.send(result.insertedCount > 0)
+            })
+    })
+
+    // order section
+    app.post('/addOrder', (req, res) => {
+        const name = req.body.name;
+        const email = req.body.email;
+        const description = req.body.description;
+        const service = req.body.service;
+        const price = req.body.price;
+        const file = req.files.image;
+        const Img = file.data;
+        const encImg = Img.toString('base64');
+        const image = {
+            contentType: req.files.image.mimetype,
+            size: req.files.image.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+
+        creativityCollection.insertOne({ name, email, description, service, price, image })
+            .then(result => {
+                res.send(result.insertedCount > 0)
+            })
+    })
+
+    // users order
+    app.get('/orders', (req, res) => {
+        creativityCollection.find({ email: req.query.email })
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
+
+    // show all service in admin table
+    app.get('/allService', (req, res) => {
+        creativityCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
+
+    // review section
+    app.post('/addReview', (req, res) => {
+        const review = req.body;
+        reviewCollection.insertOne(review)
+            .then(result => {
+                res.status(200).send(result.insertedCount > 0)
+            })
+    })
+
+    // add all review in home page
+    app.get('/reviews', (req, res) => {
+        reviewCollection.find({})
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
+    })
 });
 
 app.listen(process.env.PORT || port)
