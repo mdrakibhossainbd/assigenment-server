@@ -19,138 +19,91 @@ app.get('/',(req,res)=>{
 })
 
 client.connect(err => {
-    const ServiceCollection = client.db("creativeAgency").collection("services");
-    const UserServiceCollection = client.db("creativeAgency").collection("userServices");
-    const UserReviewCollection = client.db("creativeAgency").collection("userReview");
-    const AdminsCollection = client.db("creativeAgency").collection("admins");
-  
-    // Show Services in the home page
-    app.get('/getServices', (req, res) => {
-      ServiceCollection.find({})
-        .toArray((err, documents) => {
-          res.send(documents)
-        })
-    });
-    //  Add Order in the home page
-    app.post('/addOrder', (req, res) => {
-      const file = req.files.file;
-      const name = req.body.name;
-      const email = req.body.email;
-      const title = req.body.title;
-      const description = req.body.description;
-      const price = req.body.price;
-      const newImg = file.data;
-      const encImg = newImg.toString('base64');
-  
-      var image = {
-        contentType: file.mimetype,
-        size: file.size,
-        img: Buffer.from(encImg, 'base64')
-      };
-      UserServiceCollection.insertOne({ image, name, email, title, price, description })
-        .then(result => {
-          res.send(result.insertedCount > 0)
-        })
-    });
-  
-    // Show Services in the home page
-    app.get('/getUserServices', (req, res) => {
-      const bearer = req.headers.authorization;
-      if (bearer && bearer.startsWith('Bearer ')) {
-        const idToken = bearer.split(' ')[1];
-        // idToken comes from the client app
-        admin.auth().verifyIdToken(idToken)
-          .then((decodedToken) => {
-            let tokenEmail = decodedToken.email;
-            UserServiceCollection.find({
-              email: tokenEmail
-            })
-              .toArray((err, documents) => {
-                res.send(documents)
-              })
-          }).catch((error) => {
-            res.sendStatus(401);
+  const companiesCollection = client.db("creativeAgencyDB").collection("companies");
+  const feedbackCollection = client.db("creativeAgencyDB").collection("feedback");
+  const servicesCollection = client.db("creativeAgencyDB").collection("services");
+  const ordersCollection = client.db("creativeAgencyDB").collection("orders");
+  const adminsCollection = client.db("creativeAgencyDB").collection("admins");
+
+
+  app.get('/companies', (req, res) => {
+      companiesCollection.find({})
+          .toArray((err, documents) => {
+              res.send(documents);
+          })
+  })
+
+
+  app.get('/feedback', (req, res) => {
+      feedbackCollection.find({})
+          .toArray((err, documents) => {
+              res.send(documents);
+          })
+  })
+
+  app.post('/feedback', (req, res) => {
+      const orders = req.body;
+      feedbackCollection.insertOne(orders)
+          .then(result => {
+              res.send(result.insertedCount > 0)
+          })
+  })
+
+
+  app.get('/services', (req, res) => {
+      servicesCollection.find({})
+          .toArray((err, documents) => {
+              res.send(documents);
+          })
+  })
+
+  app.post('/services', (req, res) => {
+      const services = req.body;
+      servicesCollection.insertOne(services)
+          .then(result => {
+              res.send(result.insertedCount > 0)
+          })
+  })
+
+
+  app.post('/admins', (req, res) => {
+      const admins = req.body;
+      adminsCollection.insertOne(admins)
+          .then(result => {
+              res.send(result.insertedCount > 0)
+          })
+  })
+
+
+  app.get('/target-orders', (req, res) => {
+      ordersCollection.find({ email: req.query.email })
+          .toArray((err, documents) => {
+              res.send(documents);
+          })
+  })
+
+  app.get('/orders', (req, res) => {
+      ordersCollection.find({})
+          .toArray((err, documents) => {
+              res.send(documents);
+          })
+  })
+
+  app.post('/orders', (req, res) => {
+      const orders = req.body;
+      ordersCollection.insertOne(orders)
+          .then(result => {
+              res.send(result.insertedCount > 0)
+          })
+  })
+
+
+  app.delete('/delete/:id', (req, res) => {
+      ordersCollection.deleteOne({ _id: ObjectId(req.params.id) })
+          .then((result) => {
+              res.send(result.deletedCount > 0);
           });
-      } else {
-        res.sendStatus(401);
-      }
-    });
-  
-    // Add Review
-    app.post('/addReview', (req, res) => {
-      const userInfo = req.body
-      UserReviewCollection.insertOne(userInfo)
-        .then(result => {
-          res.send(result.insertedCount > 0)
-        })
-    });
-    // Show Review in the home page
-    app.get('/getReview', (req, res) => {
-      UserReviewCollection.find({}).limit(6)
-        .toArray((err, documents) => {
-          res.send(documents)
-        })
-    });
-    // Show AllServices in the home page
-    app.get('/getAllServices', (req, res) => {
-      UserServiceCollection.find({})
-        .toArray((err, documents) => {
-          res.send(documents)
-        })
-    });
-    //  Add Order in the home page
-    app.post('/AddService', (req, res) => {
-      const file = req.files.file;
-      const title = req.body.title;
-      const description = req.body.description;
-      const newImg = file.data;
-      const encImg = newImg.toString('base64');
-  
-      var image = {
-        contentType: file.mimetype,
-        size: file.size,
-        img: Buffer.from(encImg, 'base64')
-      };
-      ServiceCollection.insertOne({ image, title, description })
-        .then(result => {
-          res.send(result.insertedCount > 0)
-        })
-    });
-    // Add Admin
-    app.post('/addAdmin', (req, res) => {
-      const userInfo = req.body
-      AdminsCollection.insertOne(userInfo)
-        .then(result => {
-          res.send(result.insertedCount > 0)
-        })
-    });
-    // Find Admin
-    app.post('/isAdmin', (req, res) => {
-      const email = req.body.email;
-      AdminsCollection.find({ email: email })
-        .toArray((err, admins) => {
-          res.send(admins.length > 0);
-        })
-    });
-    // Find user
-    app.post('/isUser', (req, res) => {
-      const email = req.body.email;
-      UserServiceCollection.find({ email: email })
-        .toArray((err, user) => {
-          res.send(user.length > 0);
-        })
-    });
-    // Update status
-    app.patch('/update/:id', (req, res) => {
-      UserServiceCollection.updateOne({ _id: ObjectId(req.params.id) },
-        {
-          $set: { project: req.body.project }
-        })
-        .then(result => {
-          console.log(result)
-          res.send(result.modifiedCount > 0)
-        })
-    });
+  });
 });
 
 app.listen(process.env.PORT || port)

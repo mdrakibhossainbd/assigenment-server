@@ -21,13 +21,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tamim-Hossain/creative-agency-server.git"
+    "url": "git+https://github.com/hHossain/creative-agency-server.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Tamim-Hossain/creative-agency-server/issues"
+    "url": "https://github.com/hHossain/creative-agency-server/issues"
   },
-  "homepage": "https://github.com/Tamim-Hossain/creative-agency-server#readme"
+  "homepage": "https://github.com/hHossain/creative-agency-server#readme"
 }
